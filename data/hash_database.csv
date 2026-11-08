@@ -1,0 +1,9 @@
+id,sha256_hash,classification,source,date_added,description
+1,a3f1c2d4e5b6789012345678abcdef01234567890abcdef1234567890abcdef12,known_malware,VirusTotal,2024-01-15,Banking trojan — steals OTP via SMS interception
+2,deadbeef0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c,known_malware,MalwareBazaar,2024-03-22,SpyNote RAT — remote access trojan
+3,cafebabe1122334455667788990011223344556677889900112233445566778899,known_malware,Hybrid-Analysis,2024-05-10,Joker spyware — subscribes user to premium SMS services
+4,feedface00112233445566778899aabbccddeeff00112233445566778899aabb,known_malware,CERT-In,2024-07-03,Anubis banking malware — credential harvester
+5,baadf00d1234567890abcdef1234567890abcdef1234567890abcdef12345678,known_malware,VirusTotal,2024-09-18,FluBot SMS worm — spreads via fake delivery notifications
+6,0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20,trusted_reference,Google Play,2024-02-01,Official Google Chrome APK v121.0.6167.143
+7,f0e1d2c3b4a59687786960504030201f0e1d2c3b4a596877869605040302010,trusted_reference,Google Play,2024-04-15,Official WhatsApp Messenger APK v2.24.3.77
+8,1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b,trusted_reference,AOSP,2024-06-20,Android Settings APK from AOSP 14 release build
