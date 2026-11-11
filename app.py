@@ -299,7 +299,21 @@ with tab1:
                 if integrity_ok and sha256_val:
                     try:
                         label = os.path.splitext(uploaded.name)[0]
-                        integrity_result = integrity_mod.verify_integrity(tmp_path, label)
+                        # Auto-record baseline on first scan of this APK
+                        existing = integrity_mod.list_baselines()
+                        if label not in existing:
+                            integrity_mod.record_baseline(tmp_path, label)
+                            integrity_result = {
+                                "status": "no_baseline",
+                                "stored_hash": sha256_val,
+                                "current_hash": sha256_val,
+                                "message": (
+                                    f"First scan: baseline recorded for '{label}'. "
+                                    "Re-upload the same APK to verify integrity."
+                                ),
+                            }
+                        else:
+                            integrity_result = integrity_mod.verify_integrity(tmp_path, label)
                         results["integrity"] = integrity_result
                     except Exception as e:
                         results["integrity_error"] = str(e)
@@ -402,11 +416,18 @@ with tab1:
                 if integrity_result:
                     s = integrity_result.get("status", "")
                     if s == "match":
-                        st.markdown('<span class="badge-pass">MATCH</span>', unsafe_allow_html=True)
+                        st.markdown('<span class="badge-pass">VERIFIED ✓</span>', unsafe_allow_html=True)
+                        st.caption("Hash matches baseline")
                     elif s == "mismatch":
-                        st.markdown('<span class="badge-fail">MISMATCH</span>', unsafe_allow_html=True)
+                        st.markdown('<span class="badge-fail">MODIFIED ✗</span>', unsafe_allow_html=True)
+                        st.caption("Hash differs from baseline")
+                    elif s == "no_baseline":
+                        st.markdown('<span class="badge-info">BASELINE SET</span>', unsafe_allow_html=True)
+                        st.caption("Re-upload to verify")
+                    elif s == "error":
+                        st.markdown('<span class="badge-warn">ERROR</span>', unsafe_allow_html=True)
                     else:
-                        st.markdown('<span class="badge-warn">NO BASELINE</span>', unsafe_allow_html=True)
+                        st.markdown('<span class="badge-warn">UNKNOWN</span>', unsafe_allow_html=True)
                 else:
                     st.markdown('<span class="badge-warn">N/A</span>', unsafe_allow_html=True)
 
@@ -429,6 +450,7 @@ with tab1:
                 if ml_result:
                     pred = ml_result.get("prediction", "Unknown")
                     conf = ml_result.get("confidence")
+                    err  = ml_result.get("error")
                     if pred == "Malware":
                         st.markdown('<span class="badge-fail">MALWARE</span>', unsafe_allow_html=True)
                     elif pred == "Benign":
@@ -437,6 +459,11 @@ with tab1:
                         st.markdown('<span class="badge-warn">UNKNOWN</span>', unsafe_allow_html=True)
                     if conf:
                         st.caption(f"Confidence: {conf:.1%}")
+                    if err:
+                        st.caption(f"⚠ {err[:80]}")
+                elif results.get("ml_error"):
+                    st.markdown('<span class="badge-warn">ERROR</span>', unsafe_allow_html=True)
+                    st.caption(str(results["ml_error"])[:80])
                 else:
                     st.markdown('<span class="badge-warn">N/A</span>', unsafe_allow_html=True)
 
@@ -664,7 +691,7 @@ with tab4:
                         "hash_match", "ml_prediction", "overall_risk", "risk_score"]
         show_df = history[[c for c in display_cols if c in history.columns]]
         st.dataframe(
-            show_df.style.applymap(colour_risk, subset=["overall_risk"]),
+            show_df.style.map(colour_risk, subset=["overall_risk"]),
             use_container_width=True, hide_index=True
         )
 
